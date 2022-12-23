@@ -7,7 +7,7 @@ class Window(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.thread = None
+
         self.initTreads()
         self.initUI()
         self.initSignals()
@@ -56,8 +56,8 @@ class Window(QtWidgets.QWidget):
 
     def onSystemInfoReceived(self, info):
 
-        self.cpuLoad.display(f"{info[0]}%")
-        self.ramLoad.display(f"{info[1]}%")
+        self.cpuLoad.display(f"{info[0]}")
+        self.ramLoad.display(f"{info[1]}")
 
     def closeEvent(self, event: QtCore.QEvent) -> None:
 

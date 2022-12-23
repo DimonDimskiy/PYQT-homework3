@@ -3,8 +3,9 @@
 """
 
 import time
-
 import psutil
+import requests
+
 from PySide6 import QtCore
 
 
@@ -30,15 +31,23 @@ class SystemInfo(QtCore.QThread):
 
 
 class WeatherHandler(QtCore.QThread):
-    # TODO Пропишите сигналы, которые считаете нужными
+    #weatherDataReceived = QtCore.Signal(object)
+    statusCodeReceived = QtCore.Signal(int)
 
-    def __init__(self, lat, lon, parent=None):
+
+    def __init__(self, lat=60, lon=30, parent=None):
         super().__init__(parent)
 
-        self.__api_url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true"
+        self.__url = "https://api.open-meteo.com/v1/forecast"
         self.__delay = 10
-        self.__status = None
-
+        self.status = True
+        self.payload = {
+            'latitude': lat,
+            'longitude': lon,
+            'timezone': 'auto',
+            'current_weather': True,
+            'daily': ['sunrise', 'sunset']
+        }
     def setDelay(self, delay) -> None:
         """
         Метод для установки времени задержки обновления сайта
@@ -48,15 +57,28 @@ class WeatherHandler(QtCore.QThread):
         """
 
         self.__delay = delay
+    # @property
+    # def status(self):
+    #     return self.__status
+    #
+    # @status.setter
+    # def status(self, value: bool):
+    #     self.__status = value
 
     def run(self) -> None:
         # TODO настройте метод для корректной работы
 
-        while self.__status:
-            # TODO Примерный код ниже
-            """
-            response = requests.get(self.__api_url)
-            data = response.json()
-            ваш_сигнал.emit(data)
-            sleep(delay)
-            """
+        self.started.emit()
+
+        while self.status:
+            pass
+            # response = requests.get(self.__url, params=self.payload)
+            # #data = response.json()
+            # status = response.status_code
+            # self.statusCodeReceived.emit(status)
+            # #self.weatherDataReceived.emit(data)
+            # time.sleep(self.__delay)
+
+        self.finished.emit()
+
+
