@@ -31,22 +31,22 @@ class SystemInfo(QtCore.QThread):
 
 
 class WeatherHandler(QtCore.QThread):
-    #weatherDataReceived = QtCore.Signal(object)
+    weatherDataReceived = QtCore.Signal(object)
     statusCodeReceived = QtCore.Signal(int)
 
 
-    def __init__(self, lat=60, lon=30, parent=None):
+    def __init__(self, lat=None, lon=None, parent=None):
         super().__init__(parent)
 
         self.__url = "https://api.open-meteo.com/v1/forecast"
         self.__delay = 10
-        self.status = True
+        self.__status = True
         self.payload = {
             'latitude': lat,
             'longitude': lon,
             'timezone': 'auto',
             'current_weather': True,
-            'daily': ['sunrise', 'sunset']
+            'daily': None #['sunrise', 'sunset']
         }
     def setDelay(self, delay) -> None:
         """
@@ -57,27 +57,28 @@ class WeatherHandler(QtCore.QThread):
         """
 
         self.__delay = delay
-    # @property
-    # def status(self):
-    #     return self.__status
-    #
-    # @status.setter
-    # def status(self, value: bool):
-    #     self.__status = value
+
+    @property
+    def status(self):
+        return self.__status
+
+    @status.setter
+    def status(self, value: bool):
+        self.__status = value
 
     def run(self) -> None:
         # TODO настройте метод для корректной работы
 
         self.started.emit()
-
-        while self.status:
+        self.status = True
+        while self.__status:
             pass
-            # response = requests.get(self.__url, params=self.payload)
-            # #data = response.json()
-            # status = response.status_code
-            # self.statusCodeReceived.emit(status)
-            # #self.weatherDataReceived.emit(data)
-            # time.sleep(self.__delay)
+            response = requests.get(self.__url, params=self.payload)
+            data = response.json()
+            status = response.status_code
+            self.statusCodeReceived.emit(status)
+            self.weatherDataReceived.emit(data["current_weather"])
+            time.sleep(self.__delay)
 
         self.finished.emit()
 

@@ -9,6 +9,7 @@
 3. поле для вывода информации о погоде в указанных координатах
 4. поток необходимо запускать и останавливать при нажатие на кнопку
 """
+import json
 
 from PySide6 import QtWidgets, QtCore
 
@@ -75,16 +76,23 @@ class Window(QtWidgets.QWidget):
     def initSignals(self):
 
         self.pushButton.clicked.connect(self.onPushButtonClicked)
-        # self.thread.started.connect(self.onThreadStarted)
-        # self.thread.statusCodeReceived.connect(self.onStatusCodeReceived)
-        # self.thread.weatherDataReceived.connect(self.onWeatherDateReceived)
+        self.thread.finished.connect(self.onThreadFinished)
+        self.thread.statusCodeReceived.connect(self.onStatusCodeReceived)
+        self.thread.weatherDataReceived.connect(self.onWeatherDataReceived)
 
-    # def onStatusCodeReceived(self, value):
-    #     print(f"code Received{value}")
-    #     self.weatherInfo.appendPlainText(f"code Received{value}")
+
+    def onStatusCodeReceived(self, value):
+        self.weatherInfo.appendPlainText(f"code Received{value}")
+
+    def onWeatherDataReceived(self, data):
+        self.weatherInfo.appendPlainText(f"Температура:{data['temperature']}/n/"
+                                         f"Скорость ветра:{data['windspeed']}/n/"
+                                         f"Направление ветра:{data['winddirection']}/n/"
+                                         )
+
 
     def onPushButtonClicked(self, status: bool):
-        print(status)
+
         if status:
             self.thread.payload["longitude"] = self.longitudeInsert.value()
             self.thread.payload["latitude"] = self.latitudeInsert.value()
@@ -92,18 +100,21 @@ class Window(QtWidgets.QWidget):
             self.delayInsert.setEnabled(False)
             self.longitudeInsert.setEnabled(False)
             self.latitudeInsert.setEnabled(False)
-            print(self.thread.payload)
-            self.thread.run()
+            self.pushButton.setText("Стоп")
+            self.thread.start()
         else:
             self.thread.status = False
+            self.pushButton.setText("Старт")
+            self.pushButton.setEnabled(False)
 
-
+    def onThreadFinished(self):
+        self.pushButton.setEnabled(True)
+        self.delayInsert.setEnabled(True)
+        self.longitudeInsert.setEnabled(True)
+        self.latitudeInsert.setEnabled(True)
 
     def closeEvent(self, event: QtCore.QEvent) -> None:
-        self.thread.quit()
-
-
-
+        self.thread.terminate()
 
 
 if __name__ == "__main__":
