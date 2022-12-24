@@ -8,6 +8,7 @@ import b_systeminfo_widget
 import c_weatherapi_widget
 
 class Window(QtWidgets.QMainWindow):
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
